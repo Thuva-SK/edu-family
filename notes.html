@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Notes, Past Papers and GK | EDU FAMILY</title>
+  <meta name="description" content="Browse downloadable notes, past papers, and general knowledge resources with search, category filters, and latest upload indicators.">
+  <meta name="keywords" content="study notes, past papers, GK resources, downloadable education materials, exam papers">
+  <meta name="author" content="EDU FAMILY">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://edufamily.vercel.app/notes.html">
+  <meta property="og:title" content="Study Notes, Past Papers and GK | EDU FAMILY">
+  <meta property="og:description" content="Find organized educational resources for revision, exam preparation, and general knowledge learning.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://edufamily.vercel.app/notes.html">
+  <meta property="og:image" content="https://edufamily.vercel.app/assets/edu-family-logo.jpeg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="EDU FAMILY Resources">
+  <meta name="twitter:description" content="Search and filter notes, past papers, and GK content.">
+  <meta name="twitter:image" content="https://edufamily.vercel.app/assets/edu-family-logo.jpeg">
+  <link rel="icon" href="assets/edu-family-logo.jpeg">
+  <link rel="stylesheet" href="style.css">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LearningResource",
+      "name": "EDU FAMILY Study Resources",
+      "url": "https://edufamily.vercel.app/notes.html",
+      "educationalUse": "Study and exam preparation",
+      "provider": {"@type": "EducationalOrganization", "name": "EDU FAMILY"}
+    }
+  </script>
+</head>
+<body>
+  <div data-component="nav"></div>
+
+  <main>
+    <section class="page-hero section-pad">
+      <div class="container reveal">
+        <span class="eyebrow">Resource library</span>
+        <h1>Notes, Past Papers and General Knowledge</h1>
+        <p>Search, filter, sort, and view resources from a responsive library that updates instantly when administrators publish new content.</p>
+      </div>
+    </section>
+
+    <section class="section-pad">
+      <div class="container">
+        <div class="toolbar reveal" role="search">
+          <input id="resourceSearch" type="search" placeholder="Search by title, category or description" aria-label="Search resources">
+          <select id="categoryFilter" aria-label="Filter by category">
+            <option value="all">All Categories</option>
+            <option value="Past Papers">Past Papers</option>
+            <option value="Notes">Notes</option>
+            <option value="General Knowledge">General Knowledge</option>
+          </select>
+          <select id="sortResources" aria-label="Sort resources">
+            <option value="latest">Latest first</option>
+            <option value="oldest">Oldest first</option>
+          </select>
+        </div>
+
+        <section class="resource-section reveal" aria-labelledby="past-papers-title">
+          <h2 id="past-papers-title">Past Papers</h2>
+          <div class="resource-grid" id="pastPapersGrid"></div>
+        </section>
+        <section class="resource-section reveal" aria-labelledby="notes-title">
+          <h2 id="notes-title">Notes</h2>
+          <div class="resource-grid" id="notesGrid"></div>
+        </section>
+        <section class="resource-section reveal" aria-labelledby="gk-title">
+          <h2 id="gk-title">General Knowledge (GK)</h2>
+          <div class="resource-grid" id="gkGrid"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div data-component="footer"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+</html>

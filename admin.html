@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | EDU FAMILY</title>
+  <meta name="description"
+    content="Secure admin dashboard for managing EDU FAMILY notes, past papers, GK content, and news articles.">
+  <meta name="keywords" content="EDU FAMILY admin, content dashboard, education CMS, manage notes, manage news">
+  <meta name="author" content="EDU FAMILY">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://edufamily.vercel.app/admin.html">
+  <meta property="og:title" content="EDU FAMILY Admin Dashboard">
+  <meta property="og:description" content="Private dashboard for managing education resources and news.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://edufamily.vercel.app/admin.html">
+  <meta property="og:image" content="https://edufamily.vercel.app/assets/edu-family-logo.jpeg">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="EDU FAMILY Admin">
+  <meta name="twitter:description" content="Private content management dashboard.">
+  <meta name="twitter:image" content="https://edufamily.vercel.app/assets/edu-family-logo.jpeg">
+  <link rel="icon" href="assets/edu-family-logo.jpeg">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="admin-body">
+  <main>
+    <section class="login-screen" id="loginScreen">
+      <form class="login-card" id="loginForm">
+        <div class="login-brand-panel">
+          <a class="brand" href="index.html"><img class="brand-logo" src="assets/edu-family-logo.jpeg"
+              alt="EDU FAMILY logo"><span>EDU FAMILY</span></a>
+          <div>
+            <span class="eyebrow">Admin area</span>
+            <h1>Manage learning content.</h1>
+            <p>Update resources, news, and academic materials from a simple browser-based dashboard.</p>
+          </div>
+          <a class="btn btn-light login-home-btn" href="index.html">Back to Home</a>
+        </div>
+        <div class="login-form-panel">
+          <h2>Sign In</h2>
+          <p class="form-help">Use the administrator email and password provided for EDU FAMILY.</p>
+          <label for="username">Admin Email</label>
+          <input id="username" name="username" type="email" autocomplete="username" placeholder="Enter Admin Email"
+            required>
+          <label for="password">Password</label>
+          <div class="password-wrapper">
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+            <button class="password-toggle" type="button" aria-label="Toggle password visibility"
+              data-password-toggle="password">
+              <svg viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+          <button class="btn btn-primary" id="loginSubmitBtn" type="submit">Sign In</button>
+          <p class="auth-message" id="authMessage" role="status" aria-live="polite"></p>
+        </div>
+      </form>
+    </section>
+
+    <section class="admin-shell" id="adminShell" hidden>
+      <aside class="admin-sidebar" aria-label="Admin dashboard navigation">
+        <div class="admin-sidebar-head">
+          <a class="brand" href="index.html"><img class="brand-logo" src="assets/edu-family-logo.jpeg"
+              alt="EDU FAMILY logo"><span>EDU FAMILY</span></a>
+          <button class="admin-mobile-toggle" id="adminMobileToggle" type="button" aria-label="Open admin menu"
+            aria-controls="adminNav" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+        <nav id="adminNav" aria-label="Admin navigation">
+          <button class="admin-tab active" data-admin-tab="resources" type="button">Resources</button>
+          <button class="admin-tab" data-admin-tab="news" type="button">News Articles</button>
+        </nav>
+        <div class="admin-sidebar-footer">
+          <a href="index.html" class="admin-sidebar-link">View Website</a>
+          <button class="btn logout-sidebar-btn" id="logoutBtn" type="button">Logout</button>
+        </div>
+      </aside>
+
+      <div class="admin-main">
+        <header class="admin-topbar">
+          <div>
+            <h2>Dashboard</h2>
+            <p class="live-clock" aria-live="polite">Loading current time...</p>
+            <p class="form-help">Content changes are stored locally in this browser.</p>
+          </div>
+        </header>
+
+        <section class="admin-stats" aria-label="Dashboard analytics">
+          <article class="stat-card"><span id="adminNotesCount">0</span>
+            <p>Total Notes</p>
+          </article>
+          <article class="stat-card"><span id="adminPapersCount">0</span>
+            <p>Total Past Papers</p>
+          </article>
+          <article class="stat-card"><span id="adminGkCount">0</span>
+            <p>Total GK Items</p>
+          </article>
+          <article class="stat-card"><span id="adminNewsCount">0</span>
+            <p>Total News Posts</p>
+          </article>
+        </section>
+
+        <section class="admin-panel" id="resourcesPanel">
+          <div class="admin-panel-head">
+            <div>
+              <h2>Manage Resources</h2>
+              <p>Add, edit, or delete notes, past papers, and GK content.</p>
+            </div>
+            <button class="btn btn-primary" data-open-resource-modal type="button">Add Resource</button>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminResourcesTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="admin-panel" id="newsPanel" hidden>
+          <div class="admin-panel-head">
+            <div>
+              <h2>Manage News</h2>
+              <p>Publish and update education news articles.</p>
+            </div>
+            <button class="btn btn-primary" data-open-news-modal type="button">Add News</button>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Headline</th>
+                  <th>Date</th>
+                  <th>Featured</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminNewsTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="resourceModal" aria-hidden="true" role="dialog" aria-modal="true"
+    aria-labelledby="resourceModalTitle">
+    <div class="modal-dialog">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close modal">×</button>
+      <form id="resourceForm" class="modal-form">
+        <h2 id="resourceModalTitle">Add Resource</h2>
+        <input type="hidden" id="resourceId">
+        <label for="resourceTitle">Title</label>
+        <input id="resourceTitle" required>
+        <label for="resourceCategory">Category</label>
+        <select id="resourceCategory" required>
+          <option value="Notes">Notes</option>
+          <option value="Past Papers">Past Papers</option>
+          <option value="General Knowledge">General Knowledge</option>
+        </select>
+        <label for="resourceDescription">Short Description</label>
+        <textarea id="resourceDescription" rows="4" required></textarea>
+        <label for="resourceDate">Upload Date</label>
+        <input id="resourceDate" type="date" required>
+        <label for="resourceFile">Upload PDF File</label>
+        <input id="resourceFile" type="file" accept="application/pdf,.pdf">
+        <p class="form-help" id="resourceFileHelp">Choose a PDF file up to 30 MB. Files are saved in this browser in
+          local content mode.</p>
+        <button class="btn btn-primary" type="submit">Save Resource</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="adminNewsModal" aria-hidden="true" role="dialog" aria-modal="true"
+    aria-labelledby="newsModalTitle">
+    <div class="modal-dialog">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close modal">×</button>
+      <form id="adminNewsForm" class="modal-form">
+        <h2 id="newsModalTitle">Add News Article</h2>
+        <input type="hidden" id="newsId">
+        <label for="newsTitle">Headline</label>
+        <input id="newsTitle" required>
+        <label for="newsSummary">Summary</label>
+        <textarea id="newsSummary" rows="3" required></textarea>
+        <label for="newsBody">Full Article</label>
+        <textarea id="newsBody" rows="6" required></textarea>
+        <label for="newsDate">Publish Date</label>
+        <input id="newsDate" type="date" required>
+        <label for="newsImage">Upload News Image</label>
+        <input id="newsImage" type="file" accept="image/*">
+        <p class="form-help" id="newsImageHelp">Choose a JPG, PNG, or WebP image up to 5 MB. Images are saved in this
+          browser in local content mode.</p>
+        <label class="checkbox-line"><input id="newsFeatured" type="checkbox"> Featured story</label>
+        <button class="btn btn-primary" type="submit">Save News</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="admin.js?v=20260516-6"></script>
+</body>
+
+</html>
