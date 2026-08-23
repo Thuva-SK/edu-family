@@ -2289,6 +2289,27 @@ input[type="file"] {
     radial-gradient(circle at 16% 0%, rgba(239, 59, 59, 0.2), transparent 45%),
     radial-gradient(circle at 84% 100%, rgba(255, 107, 74, 0.1), transparent 45%),
     linear-gradient(180deg, #0a0c10 0%, #050608 100%);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .ads-promo-card,
+[data-theme="dark"] .ads-price-checklist li,
+[data-theme="dark"] .ads-price-checklist li strong,
+[data-theme="dark"] .pay-item span,
+[data-theme="dark"] .ads-promo-tags span {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .ads-promo-card h3 {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .ads-price-checklist li {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .ads-promo-tags span {
+  color: #ff8c8c;
 }
 
 [data-theme="dark"] .password-toggle:hover {
