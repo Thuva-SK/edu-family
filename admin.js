@@ -20,6 +20,11 @@
   const logoutBtn = document.getElementById("logoutBtn");
   const resourcesPanel = document.getElementById("resourcesPanel");
   const newsPanel = document.getElementById("newsPanel");
+  const profilePanel = document.getElementById("profilePanel");
+  const passwordForm = document.getElementById("passwordForm");
+  const passwordSubmitBtn = document.getElementById("passwordSubmitBtn");
+  const passwordMessage = document.getElementById("passwordMessage");
+  const profileEmail = document.getElementById("profileEmail");
   const resourceModal = document.getElementById("resourceModal");
   const adminNewsModal = document.getElementById("adminNewsModal");
   const resourceForm = document.getElementById("resourceForm");
@@ -225,6 +230,7 @@
         const target = tab.dataset.adminTab;
         resourcesPanel.hidden = target !== "resources";
         newsPanel.hidden = target !== "news";
+        profilePanel.hidden = target !== "profile";
         closeAdminMobileMenu();
       });
     });
@@ -479,6 +485,104 @@
     }));
   }
 
+  function bindPasswordChange() {
+    if (!passwordForm) return;
+    passwordForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setPasswordMessage("");
+      if (!supabaseClient) {
+        setPasswordMessage("Supabase is not available.");
+        return;
+      }
+      const currentPassword = document.getElementById("currentPassword").value.trim();
+      const newPassword = document.getElementById("newPassword").value.trim();
+      const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        setPasswordMessage("All fields are required.");
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        setPasswordMessage("New password must be at least 6 characters.");
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        setPasswordMessage("New passwords do not match.");
+        return;
+      }
+
+      if (newPassword === currentPassword) {
+        setPasswordMessage("New password must be different from current password.");
+        return;
+      }
+
+      setPasswordLoading(true);
+      try {
+        // Re-authenticate with current password first
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session || !session.user) {
+          setPasswordMessage("No active session. Please log in again.");
+          return;
+        }
+
+        const email = session.user.email;
+        const { error: signInError } = await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: currentPassword
+        });
+
+        if (signInError) {
+          setPasswordMessage("Current password is incorrect.");
+          return;
+        }
+
+        // Update to new password
+        const { error: updateError } = await supabaseClient.auth.updateUser({
+          password: newPassword
+        });
+
+        if (updateError) {
+          setPasswordMessage(updateError.message || "Could not update password. Please try again.");
+          return;
+        }
+
+        setPasswordMessage("Password updated successfully!", "success");
+        EduFamilyStore.showToast("Password updated successfully");
+        passwordForm.reset();
+      } catch (error) {
+        setPasswordMessage(error.message || "An error occurred. Please try again.");
+      } finally {
+        setPasswordLoading(false);
+      }
+    });
+  }
+
+  function setPasswordMessage(message, type = "error") {
+    if (!passwordMessage) return;
+    passwordMessage.textContent = message;
+    passwordMessage.classList.toggle("success", type === "success");
+  }
+
+  function setPasswordLoading(isLoading) {
+    if (!passwordSubmitBtn) return;
+    passwordSubmitBtn.disabled = isLoading;
+    passwordSubmitBtn.textContent = isLoading ? "Updating..." : "Update Password";
+  }
+
+  async function loadProfileInfo() {
+    if (!supabaseClient || !profileEmail) return;
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) {
+        profileEmail.textContent = session.user.email;
+      }
+    } catch (e) {
+      profileEmail.textContent = "Unable to load email";
+    }
+  }
+
   function bindPasswordToggles() {
     document.addEventListener("click", (event) => {
       const toggle = event.target.closest("[data-password-toggle]");
@@ -511,7 +615,9 @@
     safeInit(bindResourceManagement);
     safeInit(bindNewsManagement);
     safeInit(bindTableActions);
-    safeInit(bindPasswordToggles);      // 1. Quick local session check
+    safeInit(bindPasswordChange);
+    safeInit(bindPasswordToggles);
+    safeInit(loadProfileInfo);      // 1. Quick local session check
     const { data } = await supabaseClient.auth.getSession();
     setAdminView(!!(data && data.session));
 

@@ -607,6 +607,7 @@
     initClock();
     initReveal();
     initModals();
+    await syncFromSupabase();
     refreshPageViews();
     startRealtimeWatcher();
     document.addEventListener("click", handleResourceDownload);

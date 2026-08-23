@@ -74,6 +74,7 @@
         <nav id="adminNav" aria-label="Admin navigation">
           <button class="admin-tab active" data-admin-tab="resources" type="button">Resources</button>
           <button class="admin-tab" data-admin-tab="news" type="button">News Articles</button>
+          <button class="admin-tab" data-admin-tab="profile" type="button">Profile</button>
         </nav>
         <div class="admin-sidebar-footer">
           <a href="index.html" class="admin-sidebar-link">View Website</a>
@@ -151,6 +152,54 @@
           </div>
         </section>
 
+        <section class="admin-panel" id="profilePanel" hidden>
+          <div class="admin-panel-head">
+            <div>
+              <h2>Profile Settings</h2>
+              <p>Change your admin dashboard password.</p>
+            </div>
+          </div>
+          <div class="profile-card">
+            <div class="profile-brand-side">
+              <img class="profile-brand-logo" src="assets/edu-family-logo.jpeg" alt="EDU FAMILY logo">
+              <span class="profile-brand-name">EDU FAMILY</span>
+              <p class="profile-brand-desc">Admin Dashboard</p>
+              <div class="profile-info">
+                <p class="profile-email" id="profileEmail">Loading...</p>
+                <p class="form-help">Signed in as administrator</p>
+              </div>
+            </div>
+            <div class="profile-form-side">
+              <h3>Change Password</h3>
+              <form id="passwordForm" class="settings-form" novalidate>
+                <label for="currentPassword">Current Password</label>
+                <div class="password-wrapper">
+                  <input id="currentPassword" type="password" autocomplete="current-password" required>
+                  <button class="password-toggle" type="button" aria-label="Toggle password visibility" data-password-toggle="currentPassword">
+                    <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </button>
+                </div>
+                <label for="newPassword">New Password</label>
+                <div class="password-wrapper">
+                  <input id="newPassword" type="password" autocomplete="new-password" minlength="6" required>
+                  <button class="password-toggle" type="button" aria-label="Toggle password visibility" data-password-toggle="newPassword">
+                    <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </button>
+                </div>
+                <label for="confirmPassword">Confirm New Password</label>
+                <div class="password-wrapper">
+                  <input id="confirmPassword" type="password" autocomplete="new-password" minlength="6" required>
+                  <button class="password-toggle" type="button" aria-label="Toggle password visibility" data-password-toggle="confirmPassword">
+                    <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </button>
+                </div>
+                <p class="form-help">Password must be at least 6 characters.</p>
+                <button class="btn btn-primary" id="passwordSubmitBtn" type="submit">Update Password</button>
+                <p class="auth-message" id="passwordMessage" role="status" aria-live="polite"></p>
+              </form>
+            </div>
+          </div>
+        </section>
 
       </div>
     </section>
