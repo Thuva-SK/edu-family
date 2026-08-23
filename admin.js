@@ -68,6 +68,8 @@
     return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
   }
 
+  const BUCKET_NAME = "resources";
+
   async function signInWithSupabase(email, password) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 12000);
@@ -290,14 +292,29 @@
 
       if (file) {
         try {
-          fileId = `resource-${id}-${Date.now()}`;
-          await EduFamilyStore.saveFile(fileId, file);
+          const storageId = `resource-${id}-${Date.now()}`;
+          const filePath = `pdfs/${storageId}.pdf`;
+          const { error: uploadError } = await supabaseClient.storage
+            .from(BUCKET_NAME)
+            .upload(filePath, file, { contentType: "application/pdf", upsert: true });
+          if (uploadError) throw uploadError;
+          const { data: urlData } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+          link = urlData ? urlData.publicUrl : "";
           fileData = "";
           fileName = file.name;
-          link = "";
-        } catch (error) {
-          EduFamilyStore.showToast("Could not read the PDF file");
-          return;
+          fileId = "";
+        } catch (storageError) {
+          console.warn("Supabase Storage upload failed, falling back to local storage:", storageError);
+          try {
+            fileId = `resource-${id}-${Date.now()}`;
+            await EduFamilyStore.saveFile(fileId, file);
+            fileData = "";
+            fileName = file.name;
+            link = "";
+          } catch (localError) {
+            EduFamilyStore.showToast("Could not save the PDF file");
+            return;
+          }
         }
       }
 
@@ -366,13 +383,28 @@
 
       if (image) {
         try {
-          imageFileId = `news-image-${id}-${Date.now()}`;
-          await EduFamilyStore.saveFile(imageFileId, image);
-          imageData = "";
+          const storageId = `news-image-${id}-${Date.now()}`;
+          const ext = image.name.split(".").pop() || "jpg";
+          const filePath = `news/${storageId}.${ext}`;
+          const { error: uploadError } = await supabaseClient.storage
+            .from(BUCKET_NAME)
+            .upload(filePath, image, { contentType: image.type, upsert: true });
+          if (uploadError) throw uploadError;
+          const { data: urlData } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+          imageData = urlData ? urlData.publicUrl : "";
           imageName = image.name;
-        } catch (error) {
-          EduFamilyStore.showToast("Could not read the image file");
-          return;
+          imageFileId = "";
+        } catch (storageError) {
+          console.warn("Supabase Storage upload failed for image, falling back to local:", storageError);
+          try {
+            imageFileId = `news-image-${id}-${Date.now()}`;
+            await EduFamilyStore.saveFile(imageFileId, image);
+            imageData = "";
+            imageName = image.name;
+          } catch (localError) {
+            EduFamilyStore.showToast("Could not save the image file");
+            return;
+          }
         }
       }
 

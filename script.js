@@ -336,9 +336,10 @@
 
   function resourceCard(resource) {
     const shortCategory = resource.category === "General Knowledge" ? "GK" : resource.category.split(" ").map((word) => word[0]).join("");
+    const hasValidLink = resource.link && resource.link !== "#" && !resource.link.startsWith("data:");
     const downloadUrl = resource.fileData || resource.link || "#";
     const downloadName = resource.fileName || `${resource.title.replace(/\s+/g, "-").toLowerCase()}.pdf`;
-    const fileAttribute = resource.fileId ? ` data-download-resource="${escapeAttribute(resource.fileId)}"` : "";
+    const fileAttribute = resource.fileId && !hasValidLink ? ` data-download-resource="${escapeAttribute(resource.fileId)}"` : "";
     return `
       <article class="resource-card">
         <div class="resource-icon" aria-hidden="true">${shortCategory}</div>
@@ -349,7 +350,7 @@
         <h3>${escapeHtml(resource.title)}</h3>
         <p>${escapeHtml(resource.description)}</p>
         <div class="meta-row"><span>Uploaded ${formatDate(resource.date)}</span></div>
-        <a class="btn btn-secondary" href="${escapeAttribute(downloadUrl)}" download="${escapeAttribute(downloadName)}" target="_blank" rel="noopener"${fileAttribute}>Download PDF</a>
+        <a class="btn btn-secondary" href="${escapeAttribute(downloadUrl)}" download="${escapeAttribute(downloadName)}"${hasValidLink ? ' target="_blank" rel="noopener"' : ''}${fileAttribute}>Download PDF</a>
       </article>
     `;
   }
@@ -495,12 +496,17 @@
   async function handleResourceDownload(event) {
     const link = event.target.closest("[data-download-resource]");
     if (!link) return;
-    event.preventDefault();
     const file = await getFile(link.dataset.downloadResource);
     if (!file) {
+      const href = link.getAttribute("href");
+      if (href && href !== "#" && !href.startsWith("data:")) {
+        return;
+      }
+      event.preventDefault();
       showToast("PDF file was not found in this browser");
       return;
     }
+    event.preventDefault();
     const url = URL.createObjectURL(file);
     const download = document.createElement("a");
     download.href = url;
