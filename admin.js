@@ -183,10 +183,14 @@
         }
         setAuthMessage("Login successful", "success");
         EduFamilyStore.showToast("Login successful");
-        supabaseClient.auth.setSession({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token
-        }).catch(() => { });
+        try {
+          await supabaseClient.auth.setSession({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token
+          });
+        } catch (sessionErr) {
+          console.warn("Session setup warning:", sessionErr);
+        }
         setAdminView(true);
       } catch (error) {
         if (loginAttempt !== attemptId) return;

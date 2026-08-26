@@ -80,39 +80,8 @@
     `
   };
 
-  const today = new Date();
-  const isoToday = today.toISOString().slice(0, 10);
-
-  const starterResources = [
-    { id: "res-1", title: "2025 Mathematics Model Paper", category: "Past Papers", description: "Complete model paper with structured questions for exam revision.", date: isoOffset(-1), link: "https://edufamily.vercel.app/resources/math-model-paper.pdf" },
-    { id: "res-2", title: "Science Short Notes: Energy", category: "Notes", description: "Concise theory notes covering energy forms, transfer, and applications.", date: isoOffset(-3), link: "https://edufamily.vercel.app/resources/science-energy-notes.pdf" },
-    { id: "res-3", title: "World Capitals Quick GK Set", category: "General Knowledge", description: "A quick reference guide for capitals, regions, and key facts.", date: isoOffset(-8), link: "https://edufamily.vercel.app/resources/world-capitals-gk.pdf" },
-    { id: "res-4", title: "English Literature Past Paper", category: "Past Papers", description: "Practice paper with essay prompts and comprehension questions.", date: isoOffset(-15), link: "https://edufamily.vercel.app/resources/english-literature-paper.pdf" },
-    { id: "res-5", title: "ICT Revision Notes: Databases", category: "Notes", description: "Student-friendly database concepts, diagrams, and revision checkpoints.", date: isoOffset(-2), link: "https://edufamily.vercel.app/resources/ict-database-notes.pdf" },
-    { id: "res-6", title: "Current Affairs GK Digest", category: "General Knowledge", description: "Monthly current affairs summary for interviews and scholarship exams.", date: isoOffset(-5), link: "https://edufamily.vercel.app/resources/current-affairs-gk.pdf" }
-  ];
-
-  const starterNews = [
-    { id: "news-1", title: "New Exam Preparation Calendar Released", summary: "The updated preparation calendar gives students a clearer path for weekly revision.", body: "EDU FAMILY has published a structured preparation calendar to help learners organize revision, mock tests, and subject reviews. The calendar is designed for flexible use across grades and subjects.", date: isoOffset(-1), featured: true },
-    { id: "news-2", title: "Scholarship Application Window Opens", summary: "Students can now prepare documents for the latest merit-based scholarship intake.", body: "The scholarship application period is open for eligible learners. Applicants should prepare academic records, identity documents, and recommendation letters before submitting their applications.", date: isoOffset(-4), featured: false },
-    { id: "news-3", title: "Digital Learning Workshop Announced", summary: "A new workshop will focus on study planning, note-taking, and online learning tools.", body: "Educators and students are invited to attend a practical digital learning workshop covering productive study methods and reliable online resource usage.", date: isoOffset(-7), featured: false }
-  ];
-
-  function isoOffset(days) {
-    const date = new Date();
-    date.setDate(date.getDate() + days);
-    return date.toISOString().slice(0, 10);
-  }
-
   function seedData() {
-    if (!localStorage.getItem(RESOURCE_KEY)) {
-      localStorage.setItem(RESOURCE_KEY, JSON.stringify(starterResources));
-    } else {
-      migrateStoredResourceDomains();
-    }
-    if (!localStorage.getItem(NEWS_KEY)) {
-      localStorage.setItem(NEWS_KEY, JSON.stringify(starterNews));
-    }
+    migrateStoredResourceDomains();
   }
 
   function migrateStoredResourceDomains() {
@@ -147,9 +116,7 @@
         localStorage.setItem(NEWS_KEY, JSON.stringify(news));
       }
 
-      if (resources || news) {
-        refreshPageViews();
-      }
+      refreshPageViews();
     } catch (err) {
       console.warn("Supabase Sync Error:", err);
     }
@@ -160,13 +127,21 @@
     notifyUpdate();
 
     if (supabaseClient) {
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (session) {
-        if (deletedId) {
-          await supabaseClient.from("resources").delete().eq("id", deletedId);
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+          if (deletedId) {
+            const { error } = await supabaseClient.from("resources").delete().eq("id", deletedId);
+            if (error) console.error("Supabase delete error:", error);
+          } else {
+            const { error } = await supabaseClient.from("resources").upsert(resources);
+            if (error) console.error("Supabase upsert error:", error);
+          }
         } else {
-          await supabaseClient.from("resources").upsert(resources);
+          console.warn("Supabase: No active session — resources saved locally only.");
         }
+      } catch (err) {
+        console.error("Supabase resources sync failed:", err);
       }
     }
   }
@@ -176,13 +151,21 @@
     notifyUpdate();
 
     if (supabaseClient) {
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (session) {
-        if (deletedId) {
-          await supabaseClient.from("news").delete().eq("id", deletedId);
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+          if (deletedId) {
+            const { error } = await supabaseClient.from("news").delete().eq("id", deletedId);
+            if (error) console.error("Supabase news delete error:", error);
+          } else {
+            const { error } = await supabaseClient.from("news").upsert(news);
+            if (error) console.error("Supabase news upsert error:", error);
+          }
         } else {
-          await supabaseClient.from("news").upsert(news);
+          console.warn("Supabase: No active session — news saved locally only.");
         }
+      } catch (err) {
+        console.error("Supabase news sync failed:", err);
       }
     }
   }
