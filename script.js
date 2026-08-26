@@ -109,10 +109,10 @@
       const { data: resources } = await supabaseClient.from("resources").select("*").order("created_at", { ascending: false });
       const { data: news } = await supabaseClient.from("news").select("*").order("created_at", { ascending: false });
 
-      if (resources) {
+      if (resources && resources.length > 0) {
         localStorage.setItem(RESOURCE_KEY, JSON.stringify(resources));
       }
-      if (news) {
+      if (news && news.length > 0) {
         localStorage.setItem(NEWS_KEY, JSON.stringify(news));
       }
 
@@ -508,12 +508,10 @@
 
   function openModal(modal) {
     modal.classList.add("open");
-    modal.setAttribute("aria-hidden", "false");
   }
 
   function closeModal(modal) {
     modal.classList.remove("open");
-    modal.setAttribute("aria-hidden", "true");
   }
 
   function initModals() {
