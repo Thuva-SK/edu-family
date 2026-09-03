@@ -23,8 +23,7 @@
   <meta name="twitter:description"
     content="Explore notes, papers, GK resources, and education news in one clean platform.">
   <meta name="twitter:image" content="https://edufamily.vercel.app/assets/edu-family-logo.jpeg">
-  <link rel="icon" href="assets/edu-family-logo.jpeg">
-  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="/assets/edu-family-logo.jpeg">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -33,7 +32,7 @@
       "url": "https://edufamily.vercel.app",
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://edufamily.vercel.app/notes.html?search={search_term_string}",
+        "target": "https://edufamily.vercel.app/notes?search={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     }
@@ -51,93 +50,8 @@
 </head>
 
 <body>
-  <div data-component="nav"></div>
-
-  <main>
-    <section class="hero section-pad">
-      <div class="container hero-layout reveal">
-        <div class="hero-content">
-          <span class="eyebrow">EDU FAMILY</span>
-          <h1>Free education resources for focused learners.</h1>
-          <p>Access notes, past papers, general knowledge content, and education news from one organized platform built
-            for quick study and exam preparation.</p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="notes.html">Explore Resources</a>
-            <a class="btn btn-secondary" href="news.html">Latest News</a>
-          </div>
-        </div>
-
-        <div class="hero-preview" aria-label="EDU FAMILY resource highlights">
-          <div class="hero-preview-brand">
-            <img src="assets/edu-family-logo.jpeg" alt="EDU FAMILY logo">
-            <div>
-              <strong>EDU FAMILY</strong>
-              <span>Free Education Platform</span>
-            </div>
-          </div>
-          <div class="hero-preview-list">
-            <div><span>01</span><strong>Past Papers</strong>
-              <p>Exam-ready practice materials</p>
-            </div>
-            <div><span>02</span><strong>Study Notes</strong>
-              <p>Organized learning resources</p>
-            </div>
-            <div><span>03</span><strong>Education News</strong>
-              <p>Latest academic updates</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-pad soft-band">
-      <div class="container">
-        <div class="section-heading reveal">
-          <span class="eyebrow">Freshly added</span>
-          <h2>Featured Latest Resources</h2>
-          <p>Recently uploaded learning materials and important updates stay visible so learners can move quickly.</p>
-        </div>
-        <div class="resource-grid" id="featuredResources" aria-live="polite">
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-pad">
-      <div class="container stats-grid reveal" id="statsGrid">
-        <article class="stat-card"><span id="statNotes">0</span>
-          <p>Total Notes</p>
-        </article>
-        <article class="stat-card"><span id="statPapers">0</span>
-          <p>Past Papers</p>
-        </article>
-        <article class="stat-card"><span id="statGk">0</span>
-          <p>GK Resources</p>
-        </article>
-        <article class="stat-card"><span id="statNews">0</span>
-          <p>News Posts</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="section-pad cta-band">
-      <div class="container cta-inner reveal">
-        <div>
-          <h2>Build confident learners with organized academic content.</h2>
-          <p>Keep notes, papers, GK resources, and announcements current with a fast, organized learning platform.</p>
-        </div>
-        <a class="btn btn-light" href="notes.html">Browse Resources</a>
-      </div>
-    </section>
-  </main>
-
-  <div data-component="footer"></div>
-
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js"></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 
 </html>
