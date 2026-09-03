@@ -173,6 +173,25 @@
   const BUCKET_NAME = "resources";
 
   async function signInWithSupabase(email, password) {
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (!error && data && data.session) {
+          return { data, error: null };
+        }
+        if (error) {
+          console.error("Supabase Auth login error:", error);
+          let userMessage = error.message || "Invalid email or password";
+          if (userMessage.toLowerCase().includes("invalid login credentials")) {
+            userMessage = "Invalid login credentials. Please check email/password, or verify the user is 'Confirmed' in Supabase Dashboard.";
+          }
+          return { data: null, error: { message: userMessage } };
+        }
+      } catch (sdkError) {
+        console.warn("Supabase SDK signIn failed, using fallback:", sdkError);
+      }
+    }
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 12000);
     try {
