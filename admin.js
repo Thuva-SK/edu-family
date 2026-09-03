@@ -37,15 +37,117 @@
     return !!(data && data.session);
   }
 
-  async function setAuthView() {
-    const authed = await isAuthed();
-    setAdminView(authed);
+  let isSyncing = false;
+
+  async function autoSyncLocalToSupabase() {
+    if (!supabaseClient || isSyncing) return;
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) return;
+      isSyncing = true;
+
+      const resources = EduFamilyStore.getResources();
+      const news = EduFamilyStore.getNews();
+      let syncNeeded = false;
+
+      const updatedResources = [];
+      for (const item of resources) {
+        let updatedItem = { ...item };
+        if (item.fileId) {
+          try {
+            const file = await EduFamilyStore.getFile(item.fileId);
+            if (file) {
+              const storageId = `resource-${item.id}-${Date.now()}`;
+              const filePath = `pdfs/${storageId}.pdf`;
+              const { error: uploadError } = await supabaseClient.storage
+                .from(BUCKET_NAME)
+                .upload(filePath, file, { contentType: "application/pdf", upsert: true });
+              if (!uploadError) {
+                const { data: urlData } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+                if (urlData && urlData.publicUrl) {
+                  updatedItem.link = urlData.publicUrl;
+                  updatedItem.fileId = "";
+                  updatedItem.fileData = "";
+                  syncNeeded = true;
+                }
+              }
+            }
+          } catch (e) {
+            console.warn("AutoSync file error:", e);
+          }
+        }
+        delete updatedItem.fileData;
+        updatedResources.push(updatedItem);
+      }
+
+      const updatedNews = [];
+      for (const item of news) {
+        let updatedItem = { ...item };
+        if (item.imageFileId) {
+          try {
+            const file = await EduFamilyStore.getFile(item.imageFileId);
+            if (file) {
+              const ext = (file.name || "image.jpg").split(".").pop();
+              const storageId = `news-image-${item.id}-${Date.now()}`;
+              const filePath = `news/${storageId}.${ext}`;
+              const { error: uploadError } = await supabaseClient.storage
+                .from(BUCKET_NAME)
+                .upload(filePath, file, { contentType: file.type || "image/jpeg", upsert: true });
+              if (!uploadError) {
+                const { data: urlData } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+                if (urlData && urlData.publicUrl) {
+                  updatedItem.imageData = urlData.publicUrl;
+                  updatedItem.imageFileId = "";
+                  syncNeeded = true;
+                }
+              }
+            }
+          } catch (e) {
+            console.warn("AutoSync image error:", e);
+          }
+        }
+        updatedNews.push(updatedItem);
+      }
+
+      if (updatedResources.length > 0) {
+        const { error: resErr } = await supabaseClient.from("resources").upsert(updatedResources);
+        if (!resErr) syncNeeded = true;
+      }
+
+      if (updatedNews.length > 0) {
+        const { error: newsErr } = await supabaseClient.from("news").upsert(updatedNews);
+        if (!newsErr) syncNeeded = true;
+      }
+
+      const { data: dbResources } = await supabaseClient.from("resources").select("*").order("created_at", { ascending: false });
+      const { data: dbNews } = await supabaseClient.from("news").select("*").order("created_at", { ascending: false });
+
+      if (dbResources && dbResources.length > 0) {
+        localStorage.setItem(EduFamilyStore.RESOURCE_KEY, JSON.stringify(dbResources));
+      }
+      if (dbNews && dbNews.length > 0) {
+        localStorage.setItem(EduFamilyStore.NEWS_KEY, JSON.stringify(dbNews));
+      }
+
+      EduFamilyStore.notifyUpdate();
+      renderDashboard();
+      if (syncNeeded) {
+        EduFamilyStore.showToast("Auto-synced local data to Supabase Cloud");
+      }
+    } catch (syncErr) {
+      console.warn("AutoSync Error:", syncErr);
+    } finally {
+      isSyncing = false;
+    }
   }
 
   function setAdminView(authed) {
     loginScreen.hidden = authed;
     adminShell.hidden = !authed;
-    if (authed) renderDashboard();
+    if (authed) {
+      renderDashboard();
+      autoSyncLocalToSupabase();
+    }
   }
 
   function setAuthMessage(message, type = "error") {

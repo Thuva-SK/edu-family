@@ -106,14 +106,22 @@
   async function syncFromSupabase() {
     if (!supabaseClient) return;
     try {
-      const { data: resources } = await supabaseClient.from("resources").select("*").order("created_at", { ascending: false });
-      const { data: news } = await supabaseClient.from("news").select("*").order("created_at", { ascending: false });
+      const { data: dbResources } = await supabaseClient.from("resources").select("*").order("created_at", { ascending: false });
+      const { data: dbNews } = await supabaseClient.from("news").select("*").order("created_at", { ascending: false });
 
-      if (resources && resources.length > 0) {
-        localStorage.setItem(RESOURCE_KEY, JSON.stringify(resources));
+      if (dbResources && dbResources.length > 0) {
+        const localResources = getResources();
+        const dbIds = new Set(dbResources.map((r) => r.id));
+        const unsyncedLocal = localResources.filter((r) => !dbIds.has(r.id));
+        const mergedResources = [...dbResources, ...unsyncedLocal];
+        localStorage.setItem(RESOURCE_KEY, JSON.stringify(mergedResources));
       }
-      if (news && news.length > 0) {
-        localStorage.setItem(NEWS_KEY, JSON.stringify(news));
+      if (dbNews && dbNews.length > 0) {
+        const localNews = getNews();
+        const dbIds = new Set(dbNews.map((n) => n.id));
+        const unsyncedLocal = localNews.filter((n) => !dbIds.has(n.id));
+        const mergedNews = [...dbNews, ...unsyncedLocal];
+        localStorage.setItem(NEWS_KEY, JSON.stringify(mergedNews));
       }
 
       refreshPageViews();
