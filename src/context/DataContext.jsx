@@ -14,13 +14,14 @@ export function DataProvider({ children }) {
   const [resources, setResources] = useState(() => {
     try {
       const stored = localStorage.getItem(RESOURCE_KEY);
-      const items = stored ? JSON.parse(stored) : [];
-      return items.map((r) => {
-        if (r.link && r.link.includes(LEGACY_DOMAIN)) {
-          return { ...r, link: r.link.replace(LEGACY_DOMAIN, "https://edufamily.vercel.app") };
-        }
-        return r;
-      });
+      if (!stored) return [];
+      const items = JSON.parse(stored);
+      // Purge old legacy mock items from local storage
+      const valid = items.filter((r) => r.link && !r.link.includes(LEGACY_DOMAIN) && !r.fileData);
+      if (valid.length !== items.length) {
+        localStorage.setItem(RESOURCE_KEY, JSON.stringify(valid));
+      }
+      return valid;
     } catch {
       return [];
     }
@@ -29,7 +30,14 @@ export function DataProvider({ children }) {
   const [news, setNews] = useState(() => {
     try {
       const stored = localStorage.getItem(NEWS_KEY);
-      return stored ? JSON.parse(stored) : [];
+      if (!stored) return [];
+      const items = JSON.parse(stored);
+      // Purge old legacy mock news articles from local storage
+      const valid = items.filter((n) => !n.imageData?.startsWith("data:") && !n.imageFileId);
+      if (valid.length !== items.length) {
+        localStorage.setItem(NEWS_KEY, JSON.stringify(valid));
+      }
+      return valid;
     } catch {
       return [];
     }
@@ -71,8 +79,8 @@ export function DataProvider({ children }) {
       if (Array.isArray(dbResources)) {
         setResources((prev) => {
           const dbIds = new Set(dbResources.map((r) => r.id));
-          // Only preserve genuinely unsynced local files waiting to upload
-          const unsyncedLocal = prev.filter((r) => !dbIds.has(r.id) && (r.fileId || r.fileData));
+          // Only preserve genuinely unsynced local files waiting to upload (fileId)
+          const unsyncedLocal = prev.filter((r) => !dbIds.has(r.id) && r.fileId);
           const merged = [...dbResources, ...unsyncedLocal];
           localStorage.setItem(RESOURCE_KEY, JSON.stringify(merged));
           return merged;
@@ -82,7 +90,8 @@ export function DataProvider({ children }) {
       if (Array.isArray(dbNews)) {
         setNews((prev) => {
           const dbIds = new Set(dbNews.map((n) => n.id));
-          const unsyncedLocal = prev.filter((n) => !dbIds.has(n.id) && (n.imageFileId || n.imageData));
+          // Only preserve genuinely unsynced local images waiting to upload (imageFileId)
+          const unsyncedLocal = prev.filter((n) => !dbIds.has(n.id) && n.imageFileId);
           const merged = [...dbNews, ...unsyncedLocal];
           localStorage.setItem(NEWS_KEY, JSON.stringify(merged));
           return merged;
