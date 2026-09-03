@@ -68,20 +68,21 @@ export function DataProvider({ children }) {
         dbNews = newsRes.data;
       }
 
-      if (dbResources && dbResources.length > 0) {
+      if (Array.isArray(dbResources)) {
         setResources((prev) => {
           const dbIds = new Set(dbResources.map((r) => r.id));
-          const unsyncedLocal = prev.filter((r) => !dbIds.has(r.id));
+          // Only preserve genuinely unsynced local files waiting to upload
+          const unsyncedLocal = prev.filter((r) => !dbIds.has(r.id) && (r.fileId || r.fileData));
           const merged = [...dbResources, ...unsyncedLocal];
           localStorage.setItem(RESOURCE_KEY, JSON.stringify(merged));
           return merged;
         });
       }
 
-      if (dbNews && dbNews.length > 0) {
+      if (Array.isArray(dbNews)) {
         setNews((prev) => {
           const dbIds = new Set(dbNews.map((n) => n.id));
-          const unsyncedLocal = prev.filter((n) => !dbIds.has(n.id));
+          const unsyncedLocal = prev.filter((n) => !dbIds.has(n.id) && (n.imageFileId || n.imageData));
           const merged = [...dbNews, ...unsyncedLocal];
           localStorage.setItem(NEWS_KEY, JSON.stringify(merged));
           return merged;
@@ -132,7 +133,10 @@ export function DataProvider({ children }) {
       if (session) {
         if (deletedId) {
           const { error } = await supabase.from("resources").delete().eq("id", deletedId);
-          if (error) console.error("Supabase delete error:", error);
+          if (error) {
+            console.error("Supabase delete error:", error);
+            showToast("Error deleting from cloud DB: " + error.message);
+          }
         } else {
           const cleanResources = newResources.map(({ fileData, ...r }) => r);
           const { error } = await supabase.from("resources").upsert(cleanResources);
@@ -159,7 +163,10 @@ export function DataProvider({ children }) {
       if (session) {
         if (deletedId) {
           const { error } = await supabase.from("news").delete().eq("id", deletedId);
-          if (error) console.error("Supabase news delete error:", error);
+          if (error) {
+            console.error("Supabase news delete error:", error);
+            showToast("Error deleting from cloud DB: " + error.message);
+          }
         } else {
           const { error } = await supabase.from("news").upsert(newNews);
           if (error) {

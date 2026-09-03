@@ -819,11 +819,11 @@ input[type="file"] {
 }
 
 .ads-band {
-  color: var(--white);
+  color: #ffffff;
   background:
-    radial-gradient(circle at 16% 0%, rgba(239, 59, 59, 0.3), transparent 45%),
-    radial-gradient(circle at 84% 100%, rgba(255, 107, 74, 0.15), transparent 45%),
-    linear-gradient(180deg, #0d0f14 0%, #050608 100%);
+    radial-gradient(circle at 16% 0%, rgba(239, 59, 59, 0.35), transparent 45%),
+    radial-gradient(circle at 84% 100%, rgba(255, 107, 74, 0.2), transparent 45%),
+    linear-gradient(180deg, #0f172a 0%, #090d16 100%);
   position: relative;
   overflow: hidden;
 }
@@ -840,25 +840,34 @@ input[type="file"] {
 }
 
 .ads-promo-content h2 {
+  color: #ffffff !important;
   margin-bottom: 24px;
   font-weight: 900;
   line-height: 1.05;
 }
 
+.ads-promo-content p {
+  color: #cbd5e1 !important;
+}
+
 .ads-promo-card {
   position: relative;
   padding: 32px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;
   backdrop-filter: blur(12px);
   overflow: hidden;
   transition: transform 0.3s ease, border-color 0.3s ease;
 }
 
+.ads-promo-card h3 {
+  color: #ffffff !important;
+}
+
 .ads-promo-card:hover {
   transform: translateY(-5px);
-  border-color: rgba(239, 59, 59, 0.4);
+  border-color: rgba(239, 59, 59, 0.5);
 }
 
 .card-glow {
@@ -867,7 +876,7 @@ input[type="file"] {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle at center, rgba(239, 59, 59, 0.08) 0%, transparent 50%);
+  background: radial-gradient(circle at center, rgba(239, 59, 59, 0.12) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -881,11 +890,16 @@ input[type="file"] {
   display: flex;
   justify-content: space-between;
   padding: 12px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+}
+
+.ads-price-checklist li span {
+  color: #cbd5e1;
 }
 
 .ads-price-checklist li strong {
-  color: var(--white);
+  color: #ffffff;
   font-weight: 900;
 }
 
@@ -905,10 +919,11 @@ input[type="file"] {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.4);
+  color: #94a3b8;
 }
 
 .pay-item span {
+  color: #ffffff;
   font-weight: 800;
   font-size: 1.05rem;
 }
@@ -916,14 +931,15 @@ input[type="file"] {
 .ads-cta {
   width: 100%;
   margin-top: 12px;
+  color: #ffffff !important;
   background: linear-gradient(135deg, #ef3b3b 0%, #ff6b4a 100%);
   box-shadow: 0 12px 30px rgba(239, 59, 59, 0.4);
 }
 
 .ads-promo-tags span {
   padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
   font-size: 0.82rem;
   font-weight: 800;
@@ -931,7 +947,7 @@ input[type="file"] {
 }
 
 .contact-band {
-  background: #f8fbff;
+  background: var(--bg-secondary);
 }
 
 .site-footer {
@@ -986,7 +1002,7 @@ input[type="file"] {
 }
 
 .footer-brand {
-  color: var(--white);
+  color: #ffffff;
   font-size: 1.04rem;
 }
 
@@ -1008,7 +1024,7 @@ input[type="file"] {
 .footer-contact::before {
   display: block;
   margin-bottom: 0;
-  color: var(--white);
+  color: #ffffff;
   font-size: 0.78rem;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -1034,7 +1050,7 @@ input[type="file"] {
 
 .footer-nav a:hover,
 .footer-nav a.active {
-  color: var(--white);
+  color: #ffffff;
   background: rgba(239, 59, 59, 0.18);
   border-color: rgba(239, 59, 59, 0.42);
   transform: translateX(3px);
@@ -1092,7 +1108,7 @@ input[type="file"] {
 }
 
 .footer-contact a:hover {
-  color: var(--white);
+  color: #ffffff;
   background: rgba(239, 59, 59, 0.18);
   border-color: rgba(239, 59, 59, 0.55);
 }
