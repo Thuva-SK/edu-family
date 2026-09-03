@@ -188,78 +188,80 @@ export function DataProvider({ children }) {
       if (!session) return;
 
       let syncNeeded = false;
-      const currentResources = [...resources];
-      const currentNews = [...news];
+      const pendingResources = resources.filter((r) => r.fileId);
+      const pendingNews = news.filter((n) => n.imageFileId);
 
-      const updatedResources = [];
-      for (const item of currentResources) {
-        let updatedItem = { ...item };
-        if (item.fileId) {
-          try {
-            const file = await getFile(item.fileId);
-            if (file) {
-              const storageId = `resource-${item.id}-${Date.now()}`;
-              const filePath = `pdfs/${storageId}.pdf`;
-              const { error: uploadError } = await supabase.storage
-                .from(BUCKET_NAME)
-                .upload(filePath, file, { contentType: "application/pdf", upsert: true });
-              if (!uploadError) {
-                const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
-                if (urlData && urlData.publicUrl) {
-                  updatedItem.link = urlData.publicUrl;
-                  updatedItem.fileId = "";
-                  updatedItem.fileData = "";
-                  syncNeeded = true;
-                }
+      if (pendingResources.length === 0 && pendingNews.length === 0) {
+        return;
+      }
+
+      for (const item of pendingResources) {
+        try {
+          const file = await getFile(item.fileId);
+          if (file) {
+            const storageId = `resource-${item.id}-${Date.now()}`;
+            const filePath = `pdfs/${storageId}.pdf`;
+            const { error: uploadError } = await supabase.storage
+              .from(BUCKET_NAME)
+              .upload(filePath, file, { contentType: "application/pdf", upsert: true });
+            if (!uploadError) {
+              const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+              if (urlData && urlData.publicUrl) {
+                const cleanItem = {
+                  id: item.id,
+                  title: item.title,
+                  category: item.category,
+                  description: item.description,
+                  date: item.date,
+                  link: urlData.publicUrl,
+                  fileName: item.fileName || ""
+                };
+                const { error: upsertErr } = await supabase.from("resources").upsert(cleanItem);
+                if (!upsertErr) syncNeeded = true;
               }
             }
-          } catch (e) {
-            console.warn("AutoSync file error:", e);
           }
+        } catch (e) {
+          console.warn("AutoSync file error:", e);
         }
-        delete updatedItem.fileData;
-        updatedResources.push(updatedItem);
       }
 
-      const updatedNews = [];
-      for (const item of currentNews) {
-        let updatedItem = { ...item };
-        if (item.imageFileId) {
-          try {
-            const file = await getFile(item.imageFileId);
-            if (file) {
-              const ext = (file.name || "image.jpg").split(".").pop();
-              const storageId = `news-image-${item.id}-${Date.now()}`;
-              const filePath = `news/${storageId}.${ext}`;
-              const { error: uploadError } = await supabase.storage
-                .from(BUCKET_NAME)
-                .upload(filePath, file, { contentType: file.type || "image/jpeg", upsert: true });
-              if (!uploadError) {
-                const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
-                if (urlData && urlData.publicUrl) {
-                  updatedItem.imageData = urlData.publicUrl;
-                  updatedItem.imageFileId = "";
-                  syncNeeded = true;
-                }
+      for (const item of pendingNews) {
+        try {
+          const file = await getFile(item.imageFileId);
+          if (file) {
+            const ext = (file.name || "image.jpg").split(".").pop();
+            const storageId = `news-image-${item.id}-${Date.now()}`;
+            const filePath = `news/${storageId}.${ext}`;
+            const { error: uploadError } = await supabase.storage
+              .from(BUCKET_NAME)
+              .upload(filePath, file, { contentType: file.type || "image/jpeg", upsert: true });
+            if (!uploadError) {
+              const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+              if (urlData && urlData.publicUrl) {
+                const cleanItem = {
+                  id: item.id,
+                  title: item.title,
+                  summary: item.summary,
+                  body: item.body,
+                  date: item.date,
+                  featured: item.featured || false,
+                  imageData: urlData.publicUrl,
+                  imageName: item.imageName || ""
+                };
+                const { error: upsertErr } = await supabase.from("news").upsert(cleanItem);
+                if (!upsertErr) syncNeeded = true;
               }
             }
-          } catch (e) {
-            console.warn("AutoSync image error:", e);
           }
+        } catch (e) {
+          console.warn("AutoSync image error:", e);
         }
-        updatedNews.push(updatedItem);
-      }
-
-      if (updatedResources.length > 0) {
-        await supabase.from("resources").upsert(updatedResources);
-      }
-      if (updatedNews.length > 0) {
-        await supabase.from("news").upsert(updatedNews);
       }
 
       if (syncNeeded) {
         await syncFromSupabase();
-        showToast("Auto-synced local data to Supabase Cloud");
+        showToast("Auto-synced local offline uploads to Supabase Cloud");
       }
     } catch (syncErr) {
       console.warn("AutoSync Error:", syncErr);
