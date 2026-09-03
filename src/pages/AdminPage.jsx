@@ -134,7 +134,7 @@ export default function AdminPage() {
   };
   const handleDeleteResource = async (id) => {
     if (!window.confirm("Delete this resource? This action cannot be undone.")) return;
-    const updated = resources.filter((item) => item.id !== id);
+    const updated = resources.filter((item) => String(item.id) !== String(id));
     await saveResourcesState(updated, id);
     showToast("Resource deleted");
   };
@@ -150,7 +150,7 @@ export default function AdminPage() {
   };
   const handleDeleteNews = async (id) => {
     if (!window.confirm("Delete this news article? This action cannot be undone.")) return;
-    const updated = news.filter((item) => item.id !== id);
+    const updated = news.filter((item) => String(item.id) !== String(id));
     await saveNewsState(updated, id);
     showToast("News article deleted");
   };

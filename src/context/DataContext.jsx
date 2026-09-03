@@ -138,24 +138,23 @@ export function DataProvider({ children }) {
     notifyUpdate();
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        if (deletedId) {
-          const { error } = await supabase.from("resources").delete().eq("id", deletedId);
-          if (error) {
-            console.error("Supabase delete error:", error);
-            showToast("Error deleting from cloud DB: " + error.message);
-          }
+      if (deletedId) {
+        const { error } = await supabase.from("resources").delete().eq("id", String(deletedId));
+        if (error) {
+          console.error("Supabase delete error:", error);
+          showToast("Cloud delete warning: " + (error.message || error.details || "Check DB RLS permissions"));
         } else {
-          const cleanResources = newResources.map(({ fileData, ...r }) => r);
-          const { error } = await supabase.from("resources").upsert(cleanResources);
-          if (error) {
-            console.error("Supabase upsert error:", error);
-            showToast("Saved locally. Supabase Sync Error: " + (error.message || "Check DB permissions"));
-          }
+          await syncFromSupabase();
         }
       } else {
-        showToast("Saved to local browser. Log into Admin to sync to online site.");
+        const cleanResources = newResources.map(({ fileData, ...r }) => r);
+        const { error } = await supabase.from("resources").upsert(cleanResources);
+        if (error) {
+          console.error("Supabase upsert error:", error);
+          showToast("Saved locally. Cloud Sync Error: " + (error.message || "Check DB permissions"));
+        } else {
+          await syncFromSupabase();
+        }
       }
     } catch (err) {
       console.error("Supabase resources sync failed:", err);
@@ -168,23 +167,22 @@ export function DataProvider({ children }) {
     notifyUpdate();
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        if (deletedId) {
-          const { error } = await supabase.from("news").delete().eq("id", deletedId);
-          if (error) {
-            console.error("Supabase news delete error:", error);
-            showToast("Error deleting from cloud DB: " + error.message);
-          }
+      if (deletedId) {
+        const { error } = await supabase.from("news").delete().eq("id", String(deletedId));
+        if (error) {
+          console.error("Supabase news delete error:", error);
+          showToast("Cloud delete warning: " + (error.message || error.details || "Check DB RLS permissions"));
         } else {
-          const { error } = await supabase.from("news").upsert(newNews);
-          if (error) {
-            console.error("Supabase news upsert error:", error);
-            showToast("Saved locally. Supabase Sync Error: " + (error.message || "Check DB permissions"));
-          }
+          await syncFromSupabase();
         }
       } else {
-        showToast("Saved to local browser. Log into Admin to sync to online site.");
+        const { error } = await supabase.from("news").upsert(newNews);
+        if (error) {
+          console.error("Supabase news upsert error:", error);
+          showToast("Saved locally. Cloud Sync Error: " + (error.message || "Check DB permissions"));
+        } else {
+          await syncFromSupabase();
+        }
       }
     } catch (err) {
       console.error("Supabase news sync failed:", err);
