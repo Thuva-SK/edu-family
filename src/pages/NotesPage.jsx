@@ -1,13 +1,40 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import ResourceCard from '../components/ResourceCard';
 
 export default function NotesPage() {
   const { resources } = useData();
+  const location = useLocation();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortOrder, setSortOrder] = useState('latest');
+  const [highlightedId, setHighlightedId] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const targetId = params.get('id') || params.get('resource');
+    const q = params.get('search');
+
+    if (targetId && resources.length > 0) {
+      const found = resources.find((item) => String(item.id) === String(targetId));
+      if (found) {
+        setHighlightedId(found.id);
+        if (found.category) {
+          setSelectedCategory(found.category);
+        }
+        setTimeout(() => {
+          const el = document.getElementById(`resource-${found.id}`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 200);
+      }
+    } else if (q) {
+      setSearchTerm(q);
+    }
+  }, [location.search, resources]);
 
   const filteredResources = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -82,7 +109,13 @@ export default function NotesPage() {
               <h2 id="past-papers-title">Past Papers</h2>
               <div className="resource-grid" id="pastPapersGrid">
                 {pastPapers.length > 0 ? (
-                  pastPapers.map((item) => <ResourceCard key={item.id} resource={item} />)
+                  pastPapers.map((item) => (
+                    <ResourceCard
+                      key={item.id}
+                      resource={item}
+                      isHighlighted={item.id === highlightedId}
+                    />
+                  ))
                 ) : (
                   <div className="empty-state">No Past Papers resources found.</div>
                 )}
@@ -95,7 +128,13 @@ export default function NotesPage() {
               <h2 id="notes-title">Notes</h2>
               <div className="resource-grid" id="notesGrid">
                 {notesList.length > 0 ? (
-                  notesList.map((item) => <ResourceCard key={item.id} resource={item} />)
+                  notesList.map((item) => (
+                    <ResourceCard
+                      key={item.id}
+                      resource={item}
+                      isHighlighted={item.id === highlightedId}
+                    />
+                  ))
                 ) : (
                   <div className="empty-state">No Notes resources found.</div>
                 )}
@@ -108,7 +147,13 @@ export default function NotesPage() {
               <h2 id="gk-title">General Knowledge (GK)</h2>
               <div className="resource-grid" id="gkGrid">
                 {gkList.length > 0 ? (
-                  gkList.map((item) => <ResourceCard key={item.id} resource={item} />)
+                  gkList.map((item) => (
+                    <ResourceCard
+                      key={item.id}
+                      resource={item}
+                      isHighlighted={item.id === highlightedId}
+                    />
+                  ))
                 ) : (
                   <div className="empty-state">No General Knowledge resources found.</div>
                 )}

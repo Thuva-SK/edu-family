@@ -1,7 +1,7 @@
 import React from 'react';
 import { useData } from '../context/DataContext';
 
-export default function ResourceCard({ resource }) {
+export default function ResourceCard({ resource, isHighlighted }) {
   const { isNew, formatDate, showToast, getFile } = useData();
 
   const shortCategory =
@@ -80,7 +80,10 @@ export default function ResourceCard({ resource }) {
   };
 
   return (
-    <article className="resource-card">
+    <article
+      id={`resource-${resource.id}`}
+      className={`resource-card ${isHighlighted ? 'highlight-pulse' : ''}`}
+    >
       <div className="resource-icon" aria-hidden="true">
         {shortCategory}
       </div>

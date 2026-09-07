@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 
-export default function NewsCard({ article, onReadMore }) {
+export default function NewsCard({ article, onReadMore, isHighlighted }) {
   const { isNew, formatDate, getFileUrl } = useData();
   const [imageUrl, setImageUrl] = useState(article.imageData || "");
 
@@ -18,7 +18,10 @@ export default function NewsCard({ article, onReadMore }) {
   }, [article.imageData, article.imageFileId, getFileUrl]);
 
   return (
-    <article className="news-card">
+    <article
+      id={`news-${article.id}`}
+      className={`news-card ${isHighlighted ? 'highlight-pulse' : ''}`}
+    >
       <div className="news-image" aria-hidden={!imageUrl}>
         {imageUrl ? (
           <img src={imageUrl} alt={`${article.title} news image`} />

@@ -138,6 +138,28 @@ export default function AdminPage() {
     await saveResourcesState(updated, id);
     showToast("Resource deleted");
   };
+  const BASE_URL = "https://edufamily.vercel.app";
+
+  const handleCopyResourceLink = async (resource) => {
+    const url = `${BASE_URL}/notes?id=${encodeURIComponent(resource.id)}`;
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = url;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      showToast("Resource share link copied to clipboard!");
+    } catch (err) {
+      console.warn("Copy link error:", err);
+      showToast("Failed to copy link");
+    }
+  };
 
   // News actions
   const openAddNews = () => {
@@ -153,6 +175,25 @@ export default function AdminPage() {
     const updated = news.filter((item) => String(item.id) !== String(id));
     await saveNewsState(updated, id);
     showToast("News article deleted");
+  };
+  const handleCopyNewsLink = async (article) => {
+    const url = `${BASE_URL}/news?id=${encodeURIComponent(article.id)}`;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = url;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      showToast("News share link copied to clipboard!");
+    } catch (err) {
+      console.warn("Copy link error:", err);
+      showToast("Failed to copy link");
+    }
   };
 
   const notesCount = resources.filter((item) => item.category === "Notes").length;
@@ -360,29 +401,46 @@ export default function AdminPage() {
                     </thead>
                     <tbody>
                       {resources.length > 0 ? (
-                        resources.map((item) => (
-                          <tr key={item.id}>
-                            <td data-label="Resource">
-                              <strong>{item.title}</strong>
-                              <br />
-                              <span>{item.description}</span>
-                              <br />
-                              <span className="file-label">{item.fileName || "Published PDF link"}</span>
-                            </td>
-                            <td data-label="Category">{item.category}</td>
-                            <td data-label="Date">{formatDate(item.date)}</td>
-                            <td data-label="Actions">
-                              <div className="table-actions">
-                                <button className="small-btn edit" type="button" onClick={() => openEditResource(item)}>
-                                  Edit
-                                </button>
-                                <button className="small-btn delete" type="button" onClick={() => handleDeleteResource(item.id)}>
-                                  Delete
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
+                        resources.map((item) => {
+                          const shareUrl = `${BASE_URL}/notes?id=${encodeURIComponent(item.id)}`;
+                          return (
+                            <tr key={item.id}>
+                              <td data-label="Resource">
+                                <strong>{item.title}</strong>
+                                <br />
+                                <span>{item.description}</span>
+                                <br />
+                                <span className="file-label">{item.fileName || "Published PDF link"}</span>
+                                <div className="share-link-box">
+                                  <span className="share-link-label">Share URL:</span>
+                                  <span className="share-link-text" title={shareUrl}>
+                                    {shareUrl}
+                                  </span>
+                                </div>
+                              </td>
+                              <td data-label="Category">{item.category}</td>
+                              <td data-label="Date">{formatDate(item.date)}</td>
+                              <td data-label="Actions">
+                                <div className="table-actions">
+                                  <button
+                                    className="small-btn share"
+                                    type="button"
+                                    onClick={() => handleCopyResourceLink(item)}
+                                    title="Copy shareable link to clipboard"
+                                  >
+                                    Share
+                                  </button>
+                                  <button className="small-btn edit" type="button" onClick={() => openEditResource(item)}>
+                                    Edit
+                                  </button>
+                                  <button className="small-btn delete" type="button" onClick={() => handleDeleteResource(item.id)}>
+                                    Delete
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <tr>
                           <td colSpan="4">No resources available.</td>
@@ -417,29 +475,46 @@ export default function AdminPage() {
                     </thead>
                     <tbody>
                       {news.length > 0 ? (
-                        news.map((item) => (
-                          <tr key={item.id}>
-                            <td data-label="Headline">
-                              <strong>{item.title}</strong>
-                              <br />
-                              <span>{item.summary}</span>
-                              <br />
-                              <span className="file-label">{item.imageName || "No image uploaded"}</span>
-                            </td>
-                            <td data-label="Date">{formatDate(item.date)}</td>
-                            <td data-label="Featured">{item.featured ? "Featured" : "Standard"}</td>
-                            <td data-label="Actions">
-                              <div className="table-actions">
-                                <button className="small-btn edit" type="button" onClick={() => openEditNews(item)}>
-                                  Edit
-                                </button>
-                                <button className="small-btn delete" type="button" onClick={() => handleDeleteNews(item.id)}>
-                                  Delete
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
+                        news.map((item) => {
+                          const shareUrl = `${BASE_URL}/news?id=${encodeURIComponent(item.id)}`;
+                          return (
+                            <tr key={item.id}>
+                              <td data-label="Headline">
+                                <strong>{item.title}</strong>
+                                <br />
+                                <span>{item.summary}</span>
+                                <br />
+                                <span className="file-label">{item.imageName || "No image uploaded"}</span>
+                                <div className="share-link-box">
+                                  <span className="share-link-label">Share URL:</span>
+                                  <span className="share-link-text" title={shareUrl}>
+                                    {shareUrl}
+                                  </span>
+                                </div>
+                              </td>
+                              <td data-label="Date">{formatDate(item.date)}</td>
+                              <td data-label="Featured">{item.featured ? "Featured" : "Standard"}</td>
+                              <td data-label="Actions">
+                                <div className="table-actions">
+                                  <button
+                                    className="small-btn share"
+                                    type="button"
+                                    onClick={() => handleCopyNewsLink(item)}
+                                    title="Copy shareable link to clipboard"
+                                  >
+                                    Share
+                                  </button>
+                                  <button className="small-btn edit" type="button" onClick={() => openEditNews(item)}>
+                                    Edit
+                                  </button>
+                                  <button className="small-btn delete" type="button" onClick={() => handleDeleteNews(item.id)}>
+                                    Delete
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <tr>
                           <td colSpan="4">No news posts available.</td>

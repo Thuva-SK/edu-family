@@ -1,15 +1,39 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import NewsCard from '../components/NewsCard';
 import NewsModal from '../components/NewsModal';
 
 export default function NewsPage() {
   const { news, isNew, formatDate, getFileUrl } = useData();
+  const location = useLocation();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [highlightedId, setHighlightedId] = useState(null);
   const [clockText, setClockText] = useState('');
   const [topStoryImageUrl, setTopStoryImageUrl] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const articleId = params.get('id') || params.get('article');
+    const q = params.get('search');
+    if (articleId && news.length > 0) {
+      const found = news.find((item) => String(item.id) === String(articleId));
+      if (found) {
+        setSelectedArticle(found);
+        setHighlightedId(found.id);
+        setTimeout(() => {
+          const el = document.getElementById(`news-${found.id}`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 200);
+      }
+    } else if (q) {
+      setSearchTerm(q);
+    }
+  }, [location.search, news]);
 
   useEffect(() => {
     const updateClock = () => {
@@ -127,7 +151,12 @@ export default function NewsPage() {
           <div className="news-grid" id="newsGrid" aria-live="polite">
             {filteredNews.length > 0 ? (
               filteredNews.map((article) => (
-                <NewsCard key={article.id} article={article} onReadMore={setSelectedArticle} />
+                <NewsCard
+                  key={article.id}
+                  article={article}
+                  onReadMore={setSelectedArticle}
+                  isHighlighted={article.id === highlightedId}
+                />
               ))
             ) : (
               <div className="empty-state">No news articles found.</div>
