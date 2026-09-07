@@ -12,31 +12,71 @@ export default function ResourceCard({ resource }) {
           .map((word) => word[0])
           .join("");
 
-  const hasValidLink = resource.link && resource.link !== "#" && !resource.link.startsWith("data:");
-  const downloadUrl = resource.fileData || resource.link || "#";
-  const downloadName = resource.fileName || `${resource.title.replace(/\s+/g, "-").toLowerCase()}.pdf`;
+  const isPlaceholderLink =
+    !resource.link ||
+    resource.link === "#" ||
+    resource.link.includes("edufamily.vercel.app/resources");
+
+  const downloadName =
+    resource.fileName || `${resource.title.replace(/\s+/g, "-").toLowerCase()}.pdf`;
+
+  const triggerBlobDownload = (blobOrFile, name) => {
+    const url = URL.createObjectURL(blobOrFile);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name || "resource.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   const handleDownload = async (e) => {
-    if (resource.fileId && !hasValidLink) {
-      e.preventDefault();
+    e.preventDefault();
+
+    // 1. Try IndexedDB file if saved locally
+    if (resource.fileId) {
       try {
         const file = await getFile(resource.fileId);
-        if (!file) {
-          showToast("PDF file was not found in this browser");
+        if (file) {
+          triggerBlobDownload(file, downloadName);
           return;
         }
-        const url = URL.createObjectURL(file);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = downloadName || file.name || "resource.pdf";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
       } catch (err) {
-        showToast("Error retrieving PDF file");
+        console.warn("IndexedDB download error:", err);
       }
     }
+
+    // 2. Try Base64 fileData if present
+    if (resource.fileData && resource.fileData.startsWith("data:")) {
+      try {
+        const res = await fetch(resource.fileData);
+        const blob = await res.blob();
+        triggerBlobDownload(blob, downloadName);
+        return;
+      } catch (err) {
+        console.warn("Base64 download error:", err);
+      }
+    }
+
+    // 3. Try Remote PDF Link (Supabase Storage or external URL)
+    if (resource.link && !isPlaceholderLink) {
+      try {
+        showToast("Downloading PDF...");
+        const response = await fetch(resource.link);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const blob = await response.blob();
+        triggerBlobDownload(blob, downloadName);
+        return;
+      } catch (err) {
+        console.warn("Direct fetch failed, opening URL in new tab:", err);
+        window.open(resource.link, "_blank", "noopener,noreferrer");
+        return;
+      }
+    }
+
+    // 4. Fallback if no valid PDF source is available
+    showToast("PDF file is not available for download");
   };
 
   return (
@@ -53,16 +93,13 @@ export default function ResourceCard({ resource }) {
       <div className="meta-row">
         <span>Uploaded {formatDate(resource.date)}</span>
       </div>
-      <a
+      <button
+        type="button"
         className="btn btn-secondary"
-        href={downloadUrl}
-        download={downloadName}
-        target={hasValidLink ? "_blank" : undefined}
-        rel={hasValidLink ? "noopener noreferrer" : undefined}
         onClick={handleDownload}
       >
         Download PDF
-      </a>
+      </button>
     </article>
   );
 }

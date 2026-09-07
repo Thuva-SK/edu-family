@@ -63,7 +63,7 @@ export default function ResourceModal({ resource, isOpen, onClose }) {
     let fileData = existing.fileData || "";
     let fileName = existing.fileName || "";
     let fileId = existing.fileId || "";
-    let link = existing.link || "https://edufamily.vercel.app/resources";
+    let link = existing.link || "";
 
     if (file) {
       try {
