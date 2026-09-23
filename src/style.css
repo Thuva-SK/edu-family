@@ -1185,6 +1185,8 @@ input[type="file"] {
 }
 
 .admin-body {
+  margin-top: -76px;
+  min-height: calc(100vh + 76px);
   padding-top: 0;
   background: #f5f8fc;
 }
@@ -1287,17 +1289,24 @@ input[type="file"] {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 260px 1fr;
+  position: relative;
 }
 
 .admin-sidebar {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  bottom: 0;
+  width: 260px;
   height: 100vh;
+  height: 100dvh;
   padding: 24px;
   color: #dbeafe;
   background: #0f2238;
   display: flex;
   flex-direction: column;
+  z-index: 100;
+  overflow-y: auto;
 }
 
 .admin-sidebar-head {
@@ -1467,7 +1476,9 @@ input[type="file"] {
 }
 
 .admin-main {
+  grid-column: 2;
   padding: 28px;
+  min-width: 0;
 }
 
 .admin-topbar,
@@ -1866,6 +1877,10 @@ input[type="file"] {
     padding: 30px;
   }
 
+  .admin-body {
+    margin-top: -76px;
+  }
+
   .admin-shell {
     grid-template-columns: 1fr;
   }
@@ -1873,9 +1888,17 @@ input[type="file"] {
   .admin-sidebar {
     position: sticky;
     top: 0;
-    z-index: 70;
+    left: auto;
+    bottom: auto;
+    width: 100%;
     height: auto;
+    z-index: 70;
     padding: 16px;
+    overflow-y: visible;
+  }
+
+  .admin-main {
+    grid-column: 1;
   }
 
   .admin-sidebar-head {
